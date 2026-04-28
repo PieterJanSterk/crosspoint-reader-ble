@@ -14,6 +14,7 @@
 
 #include "CrossPointSettings.h"
 #include "CrossPointState.h"
+#include "BluetoothHIDManager.h"
 #include "EpubReaderChapterSelectionActivity.h"
 #include "EpubReaderFootnotesActivity.h"
 #include "EpubReaderPercentSelectionActivity.h"
@@ -348,6 +349,19 @@ void EpubReaderActivity::jumpToPercent(int percent) {
 
 void EpubReaderActivity::onReaderMenuConfirm(EpubReaderMenuActivity::MenuAction action) {
   switch (action) {
+    case EpubReaderMenuActivity::MenuAction::BT_RECONNECT: {
+      auto& btMgr = BluetoothHIDManager::getInstance();
+      if (!btMgr.isEnabled()) {
+        // Bluetooth not enabled, nothing to do
+      } else if (SETTINGS.bleBondedDeviceAddr[0] == '\0') {
+        // No bonded remote saved
+      } else if (!btMgr.isConnected(SETTINGS.bleBondedDeviceAddr)) {
+        LOG_INF("ERS", "Quick reconnect to bonded remote: %s", SETTINGS.bleBondedDeviceAddr);
+        btMgr.connectToDevice(SETTINGS.bleBondedDeviceAddr);
+      }
+      requestUpdate();
+      break;
+    }
     case EpubReaderMenuActivity::MenuAction::SELECT_CHAPTER: {
       const int spineIdx = currentSpineIndex;
       const std::string path = epub->getPath();
