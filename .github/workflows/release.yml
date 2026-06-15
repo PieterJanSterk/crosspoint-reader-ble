@@ -33,10 +33,10 @@ jobs:
           pio run -e gh_release
           cp .pio/build/gh_release/firmware.bin ./firmware.bin
 
-      - name: Build CrossPoint (dualboot — fonts stripped to fit 6.25MB OTA slot)
+      - name: Build CrossPoint (dualboot — full fonts, for slot 0)
         run: |
-          pio run -e dualboot
-          cp .pio/build/dualboot/firmware.bin ./firmware-dualboot.bin
+          pio run -e gh_release
+          cp .pio/build/gh_release/firmware.bin ./firmware-dualboot.bin
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
