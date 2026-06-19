@@ -4,9 +4,6 @@ on:
     tags:
       - '*'
 
-permissions:
-  contents: write
-
 jobs:
   build-release:
     runs-on: ubuntu-latest
@@ -28,32 +25,23 @@ jobs:
       - name: Install PlatformIO Core
         run: uv pip install --system -U https://github.com/pioarduino/platformio-core/archive/refs/tags/v6.1.19.zip
 
-      - name: Build CrossPoint (standard release)
-        run: |
-          pio run -e gh_release
-          cp .pio/build/gh_release/firmware.bin ./firmware.bin
-
-      - name: Build CrossPoint (dualboot — full fonts, for slot 0)
-        run: |
-          pio run -e gh_release
-          cp .pio/build/gh_release/firmware.bin ./firmware-dualboot.bin
+      - name: Build CrossPoint BLE
+        run: pio run -e gh_release
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: CrossPoint-${{ github.ref_name }}
+          name: CrossPoint-BLE-${{ github.ref_name }}
           path: |
             .pio/build/gh_release/bootloader.bin
+            .pio/build/gh_release/firmware.bin
             .pio/build/gh_release/firmware.elf
             .pio/build/gh_release/firmware.map
             .pio/build/gh_release/partitions.bin
-            firmware.bin
-            firmware-dualboot.bin
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            firmware.bin
-            firmware-dualboot.bin
+            .pio/build/gh_release/firmware.bin
           generate_release_notes: true
